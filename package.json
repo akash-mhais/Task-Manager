@@ -1,0 +1,19 @@
+{
+  "name": "workflow-pro-root",
+  "version": "1.0.0",
+  "description": "Workflow Pro Root Package",
+  "private": true,
+  "scripts": {
+    "install:backend": "npm install --prefix backend --legacy-peer-deps",
+    "install:frontend": "npm install --prefix frontend --legacy-peer-deps",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "start:backend": "npm start --prefix backend",
+    "start:frontend": "npm run dev --prefix frontend",
+    "dev": "npx concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "seed": "npm run seed --prefix backend"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

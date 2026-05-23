@@ -1,0 +1,5 @@
+const axios = require("axios");
+
+// We use require/module.exports for backend but for frontend we must use import/export.
+// Wait, the API file is in the frontend, so we must use standard ES Modules export!
+// Let's rewrite using ES Modules syntax for the frontend files!
