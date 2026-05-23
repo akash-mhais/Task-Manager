@@ -43,6 +43,7 @@ const Projects = () => {
   const [budget, setBudget] = useState("");
   const [selectedManager, setSelectedManager] = useState("");
   const [selectedTeam, setSelectedTeam] = useState([]);
+  const [selectedTeamLeader, setSelectedTeamLeader] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -101,6 +102,11 @@ const Projects = () => {
       return;
     }
 
+    if (!selectedTeamLeader) {
+      setError("Please select a Team Leader for this project");
+      return;
+    }
+
     const projectData = {
       name,
       description,
@@ -110,7 +116,7 @@ const Projects = () => {
       plannedEndDate,
       budget: parseFloat(budget) || 0,
       manager: selectedManager,
-      teamMembers: selectedTeam
+      teamMembers: selectedTeamLeader ? [selectedTeamLeader] : []
     };
 
     try {
@@ -130,6 +136,7 @@ const Projects = () => {
           setBudget("");
           setSelectedManager("");
           setSelectedTeam([]);
+          setSelectedTeamLeader("");
         }, 1500);
       }
     } catch (err) {
@@ -463,34 +470,24 @@ const Projects = () => {
             </div>
           </div>
 
-          {/* Team Leaders Selection */}
+          {/* Team Leader Selection Dropdown */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Select Team Leaders
+            <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+              Select Team Leader
             </label>
-            {teamLeaders.length === 0 ? (
-              <p className="text-xs text-slate-400 italic mb-4">No active Team Leaders available.</p>
-            ) : (
-              <div className="max-h-36 overflow-y-auto border border-slate-200 dark:border-gray-800 rounded-lg p-3 grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950/30 mb-4">
-                {teamLeaders.map((tl) => (
-                  <label
-                    key={tl._id}
-                    className="flex items-center gap-2.5 p-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800/80 rounded-md cursor-pointer text-xs"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTeam.includes(tl._id)}
-                      onChange={() => handleTeamMemberToggle(tl._id)}
-                      className="rounded border-slate-300 dark:border-gray-800 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
-                    />
-                    <div>
-                      <span className="font-semibold block text-slate-800 dark:text-slate-200">{tl.name}</span>
-                      <span className="text-[10px] text-gray-500">{tl.role} • {tl.department}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
+            <select
+              required
+              value={selectedTeamLeader}
+              onChange={(e) => setSelectedTeamLeader(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 px-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none"
+            >
+              <option value="">Select Team Leader...</option>
+              {teamLeaders.map((tl) => (
+                <option key={tl._id} value={tl._id}>
+                  {tl.name} ({tl.department || "No Department"})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-3 justify-end pt-3">
