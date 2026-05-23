@@ -174,21 +174,35 @@ exports.getProject = async (req, res) => {
 exports.createProject = async (req, res) => {
   const { name, description, clientName, priority, plannedStartDate, plannedEndDate, budget, manager, teamMembers } = req.body;
 
-  if (!name || !description || !clientName || !plannedStartDate || !plannedEndDate || !budget || !manager) {
+  if (!name || !description || !clientName || !plannedStartDate || !plannedEndDate || !manager) {
     return res.status(400).json({ success: false, error: "Please fill in all project fields" });
   }
 
   try {
+    const finalBudget = budget !== undefined && budget !== null && !isNaN(budget) ? parseFloat(budget) : 0;
+    const finalPriority = priority || "Medium";
+
+    // Managers can only assign Team Leaders when creating a project
+    const filteredTeamMembers = [];
+    if (teamMembers && Array.isArray(teamMembers)) {
+      for (const memberId of teamMembers) {
+        const u = await User.findById(memberId);
+        if (u && u.role === "Team Leader" && u.status === "Active") {
+          filteredTeamMembers.push(memberId);
+        }
+      }
+    }
+
     const project = await Project.create({
       name,
       description,
       clientName,
-      priority,
+      priority: finalPriority,
       plannedStartDate,
       plannedEndDate,
-      budget,
+      budget: finalBudget,
       manager,
-      teamMembers: teamMembers || []
+      teamMembers: filteredTeamMembers
     });
 
     // Create notifications for the assigned manager and team members
@@ -200,11 +214,11 @@ exports.createProject = async (req, res) => {
       link: `/projects/${project._id}`
     });
 
-    if (teamMembers && teamMembers.length > 0) {
-      const notifications = teamMembers.map(memberId => ({
+    if (filteredTeamMembers.length > 0) {
+      const notifications = filteredTeamMembers.map(memberId => ({
         recipient: memberId,
         title: "Assigned to Project",
-        message: `You have been added to the team for the project: ${name}`,
+        message: `You have been added as Team Leader for the project: ${name}`,
         type: "ProjectUpdated",
         link: `/projects/${project._id}`
       }));
@@ -215,7 +229,7 @@ exports.createProject = async (req, res) => {
     await ActivityLog.create({
       user: req.user._id,
       action: "PROJECT_CREATE",
-      details: `Created project: ${name} (Client: ${clientName}, Budget: $${budget})`
+      details: `Created project: ${name} (Client: ${clientName}, Budget: $${finalBudget})`
     });
 
     res.status(201).json({ success: true, project });
@@ -234,34 +248,78 @@ exports.updateProject = async (req, res) => {
       return res.status(404).json({ success: false, error: "Project not found" });
     }
 
-    // Authorization
-    if (req.user.role !== "Manager") {
+    // Authorization: Manager or assigned Team Leader
+    if (req.user.role !== "Manager" && req.user.role !== "Team Leader") {
       return res.status(403).json({ success: false, error: "Not authorized to edit this project" });
     }
 
-    const {
-      name, description, clientName, priority, status,
-      plannedStartDate, plannedEndDate, actualStartDate, actualEndDate,
-      budget, manager, teamMembers
-    } = req.body;
+    if (req.user.role === "Team Leader") {
+      // Check if Team Leader is assigned to this project
+      const isAssigned = project.teamMembers.some(
+        (memberId) => memberId.toString() === req.user._id.toString()
+      );
+      if (!isAssigned) {
+        return res.status(403).json({ success: false, error: "Not authorized to edit this project" });
+      }
 
-    project.name = name || project.name;
-    project.description = description || project.description;
-    project.clientName = clientName || project.clientName;
-    project.priority = priority || project.priority;
-    project.status = status || project.status;
-    project.plannedStartDate = plannedStartDate || project.plannedStartDate;
-    project.plannedEndDate = plannedEndDate || project.plannedEndDate;
-    project.actualStartDate = actualStartDate || project.actualStartDate;
-    project.actualEndDate = actualEndDate || project.actualEndDate;
-    project.budget = budget || project.budget;
-    
-    if (req.user.role === "Manager") {
+      // Team Leaders can only update Employees (Team Members) in the teamMembers array
+      const { teamMembers } = req.body;
+      if (teamMembers) {
+        const currentProject = await Project.findById(project._id).populate("teamMembers");
+        const currentTeamLeaders = currentProject.teamMembers
+          .filter(m => m.role === "Team Leader")
+          .map(m => m._id.toString());
+
+        // Validate incoming members are active Employees
+        const incomingEmployees = [];
+        for (const memberId of teamMembers) {
+          const u = await User.findById(memberId);
+          if (u && u.role === "Employee" && u.status === "Active") {
+            incomingEmployees.push(memberId.toString());
+          }
+        }
+
+        // Merge: retain existing Team Leaders, update Employees
+        project.teamMembers = [...currentTeamLeaders, ...incomingEmployees];
+      }
+    } else {
+      // Manager can update everything
+      const {
+        name, description, clientName, priority, status,
+        plannedStartDate, plannedEndDate, actualStartDate, actualEndDate,
+        budget, manager, teamMembers
+      } = req.body;
+
+      project.name = name || project.name;
+      project.description = description || project.description;
+      project.clientName = clientName || project.clientName;
+      project.priority = priority || project.priority;
+      project.status = status || project.status;
+      project.plannedStartDate = plannedStartDate || project.plannedStartDate;
+      project.plannedEndDate = plannedEndDate || project.plannedEndDate;
+      project.actualStartDate = actualStartDate || project.actualStartDate;
+      project.actualEndDate = actualEndDate || project.actualEndDate;
+      project.budget = budget !== undefined ? budget : project.budget;
       project.manager = manager || project.manager;
-    }
-    
-    if (teamMembers) {
-      project.teamMembers = teamMembers;
+
+      if (teamMembers) {
+        const currentProject = await Project.findById(project._id).populate("teamMembers");
+        const currentEmployees = currentProject.teamMembers
+          .filter(m => m.role === "Employee")
+          .map(m => m._id.toString());
+
+        // Validate incoming members are active Team Leaders
+        const incomingTeamLeaders = [];
+        for (const memberId of teamMembers) {
+          const u = await User.findById(memberId);
+          if (u && u.role === "Team Leader" && u.status === "Active") {
+            incomingTeamLeaders.push(memberId.toString());
+          }
+        }
+
+        // Merge: retain existing Employees, update Team Leaders
+        project.teamMembers = [...incomingTeamLeaders, ...currentEmployees];
+      }
     }
 
     await project.save();

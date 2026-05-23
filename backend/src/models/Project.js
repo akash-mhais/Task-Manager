@@ -10,7 +10,7 @@ const projectSchema = new mongoose.Schema({
   plannedEndDate: { type: Date, required: true },
   actualStartDate: { type: Date },
   actualEndDate: { type: Date },
-  budget: { type: Number, required: true },
+  budget: { type: Number, default: 0 },
   manager: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   teamMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   documents: [{

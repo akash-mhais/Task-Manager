@@ -105,10 +105,10 @@ const Projects = () => {
       name,
       description,
       clientName,
-      priority,
+      priority: priority || "Medium",
       plannedStartDate,
       plannedEndDate,
-      budget: parseFloat(budget),
+      budget: parseFloat(budget) || 0,
       manager: selectedManager,
       teamMembers: selectedTeam
     };
@@ -436,54 +436,6 @@ const Projects = () => {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-                Priority
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 px-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-                Project Budget ($)
-              </label>
-              <input
-                type="number"
-                required
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 px-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
-                Assign Manager
-              </label>
-              <select
-                required
-                value={selectedManager}
-                onChange={(e) => setSelectedManager(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 px-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none"
-              >
-                <option value="">Select PM...</option>
-                {managers.map((m) => (
-                  <option key={m._id} value={m._id}>
-                    {m.name} ({m.department})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
@@ -519,7 +471,7 @@ const Projects = () => {
             {teamLeaders.length === 0 ? (
               <p className="text-xs text-slate-400 italic mb-4">No active Team Leaders available.</p>
             ) : (
-              <div className="max-h-28 overflow-y-auto border border-slate-200 dark:border-gray-800 rounded-lg p-3 grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950/30 mb-4">
+              <div className="max-h-36 overflow-y-auto border border-slate-200 dark:border-gray-800 rounded-lg p-3 grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950/30 mb-4">
                 {teamLeaders.map((tl) => (
                   <label
                     key={tl._id}
@@ -534,36 +486,6 @@ const Projects = () => {
                     <div>
                       <span className="font-semibold block text-slate-800 dark:text-slate-200">{tl.name}</span>
                       <span className="text-[10px] text-gray-500">{tl.role} • {tl.department}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Team Selection */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Select Team Members
-            </label>
-            {employees.length === 0 ? (
-              <p className="text-xs text-slate-400 italic">No active Employees available.</p>
-            ) : (
-              <div className="max-h-36 overflow-y-auto border border-slate-200 dark:border-gray-800 rounded-lg p-3 grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-950/30">
-                {employees.map((emp) => (
-                  <label
-                    key={emp._id}
-                    className="flex items-center gap-2.5 p-2 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800/80 rounded-md cursor-pointer text-xs"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTeam.includes(emp._id)}
-                      onChange={() => handleTeamMemberToggle(emp._id)}
-                      className="rounded border-slate-300 dark:border-gray-800 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
-                    />
-                    <div>
-                      <span className="font-semibold block text-slate-800 dark:text-slate-200">{emp.name}</span>
-                      <span className="text-[10px] text-gray-500">{emp.role} • {emp.department}</span>
                     </div>
                   </label>
                 ))}

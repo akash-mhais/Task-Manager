@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+// Set fallback DNS servers (resolves SRV record query ETIMEOUT issues on some local routers)
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 const dotenv = require("dotenv");
 const User = require("./models/User");
 const Project = require("./models/Project");

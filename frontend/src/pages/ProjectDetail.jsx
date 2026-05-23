@@ -889,7 +889,7 @@ const ProjectDetail = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <h4 className="text-[10px] uppercase font-black tracking-widest text-slate-400">Team Members ({project.teamMembers?.length})</h4>
-              {user?.role === "Manager" && (
+              {(user?.role === "Manager" || user?.role === "Team Leader") && (
                 <button
                   onClick={handleOpenManageTeam}
                   className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
@@ -2087,103 +2087,114 @@ const ProjectDetail = () => {
       <CustomModal isOpen={isManageTeamOpen} onClose={() => setIsManageTeamOpen(false)} title="Manage Project Team" size="md">
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           <p className="text-xs text-slate-500 dark:text-gray-400">
-            Select the Team Leaders and Employees who should be assigned to this project.
+            {user?.role === "Manager" 
+              ? "Select the Team Leaders who should be assigned to manage this project." 
+              : "Select the Employees (Team Members) who should be assigned to execute this project."}
           </p>
 
           <div className="space-y-4">
-            {/* Team Leaders Section */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-                Team Leaders
-              </h3>
-              {allUsersList.filter(u => u.role === "Team Leader").length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No team leaders found.</p>
-              ) : (
-                allUsersList.filter(u => u.role === "Team Leader").map((u) => {
-                  const isSelected = selectedTeamMembers.includes(u._id);
-                  return (
-                    <div
-                      key={u._id}
-                      onClick={() => handleToggleTeamMember(u._id)}
-                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                        isSelected
-                          ? "bg-brand-50/50 dark:bg-brand-950/20 border-brand-200/30 dark:border-brand-800"
-                          : "bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={u.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
-                          alt={u.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                        <div>
-                          <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
-                            {u.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 block">
-                            {u.role} • {u.department || "No Department"}
-                          </span>
+            {/* Team Leaders Section (Manager only) */}
+            {user?.role === "Manager" && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
+                  Team Leaders
+                </h3>
+                {allUsersList.filter(u => u.role === "Team Leader").length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">No team leaders found.</p>
+                ) : (
+                  allUsersList.filter(u => u.role === "Team Leader").map((u) => {
+                    const isSelected = selectedTeamMembers.includes(u._id);
+                    return (
+                      <div
+                        key={u._id}
+                        onClick={() => handleToggleTeamMember(u._id)}
+                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                          isSelected
+                            ? "bg-brand-50/50 dark:bg-brand-950/20 border-brand-200/30 dark:border-brand-800"
+                            : "bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={u.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
+                            alt={u.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div>
+                            <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
+                              {u.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {u.role} • {u.department || "No Department"}
+                            </span>
+                          </div>
                         </div>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          readOnly
+                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
+                        />
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        readOnly
-                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    );
+                  })
+                )}
+                <div className="pt-2 border-t border-slate-100 dark:border-gray-800/60">
+                  <span className="text-[10px] text-slate-400 block italic">
+                    * Team Members (employees) can be assigned to the project by the assigned Team Leader.
+                  </span>
+                </div>
+              </div>
+            )}
 
-            {/* Team Members Section */}
-            <div className="space-y-2 pt-2">
-              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
-                Team Members
-              </h3>
-              {allUsersList.filter(u => u.role === "Employee").length === 0 ? (
-                <p className="text-xs text-slate-400 italic">No employees found.</p>
-              ) : (
-                allUsersList.filter(u => u.role === "Employee").map((u) => {
-                  const isSelected = selectedTeamMembers.includes(u._id);
-                  return (
-                    <div
-                      key={u._id}
-                      onClick={() => handleToggleTeamMember(u._id)}
-                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
-                        isSelected
-                          ? "bg-brand-50/50 dark:bg-brand-950/20 border-brand-200/30 dark:border-brand-800"
-                          : "bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={u.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
-                          alt={u.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                        <div>
-                          <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
-                            {u.name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 block">
-                            {u.role} • {u.department || "No Department"}
-                          </span>
+            {/* Team Members Section (Team Leader only) */}
+            {user?.role === "Team Leader" && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-wider">
+                  Team Members
+                </h3>
+                {allUsersList.filter(u => u.role === "Employee").length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">No employees found.</p>
+                ) : (
+                  allUsersList.filter(u => u.role === "Employee").map((u) => {
+                    const isSelected = selectedTeamMembers.includes(u._id);
+                    return (
+                      <div
+                        key={u._id}
+                        onClick={() => handleToggleTeamMember(u._id)}
+                        className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                          isSelected
+                            ? "bg-brand-50/50 dark:bg-brand-950/20 border-brand-200/30 dark:border-brand-800"
+                            : "bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={u.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
+                            alt={u.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div>
+                            <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
+                              {u.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {u.role} • {u.department || "No Department"}
+                            </span>
+                          </div>
                         </div>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          readOnly
+                          className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
+                        />
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        readOnly
-                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5"
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
 
