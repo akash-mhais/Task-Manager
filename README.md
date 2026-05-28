@@ -44,10 +44,10 @@ The portal automatically boots with the following pre-seeded credentials for val
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Admin** | `admin@workflowpro.com` | `AdminPassword123!` |
-| **Manager** | `manager@workflowpro.com` | `ManagerPassword123!` |
-| **Team Leader** | `tl@workflowpro.com` | `LeaderPassword123!` |
-| **Employee** | `employee@workflowpro.com` | `EmployeePassword123!` |
+| **Admin** | `admin@faithautomation.com` | `AdminPassword123!` |
+| **Manager** | `manager@faithautomation.com` | `ManagerPassword123!` |
+| **Team Leader** | `tl@faithautomation.com` | `LeaderPassword123!` |
+| **Employee** | `employee@faithautomation.com` | `EmployeePassword123!` |
 
 ---
 
