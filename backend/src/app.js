@@ -29,7 +29,11 @@ app.use(cors({
     // Allow non-browser agents, Postman, curl, or same-origin requests
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+    const isLocalhost = origin.includes("localhost") || origin.includes("127.0.0.1");
+    const isVercel = origin.endsWith(".vercel.app") || origin.includes("vercel");
+    const isWhitelisted = allowedOrigins.includes(origin) || allowedOrigins.includes("*");
+    
+    if (isLocalhost || isVercel || isWhitelisted) {
       return callback(null, true);
     }
     return callback(new Error(`Origin ${origin} not allowed by CORS`));
