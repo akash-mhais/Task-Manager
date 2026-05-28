@@ -145,22 +145,7 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Info footer for testing */}
-        <div className="text-center bg-slate-900/50 border border-slate-800 rounded-lg p-4 text-xs text-slate-400 space-y-1">
-          <p className="font-bold text-slate-300">Developer/Testing Credentials:</p>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <div>
-              <p className="font-semibold text-slate-400">Manager Account:</p>
-              <p>manager@faithautomation.com</p>
-              <p className="text-[10px]">ManagerPassword123!</p>
-            </div>
-            <div>
-              <p className="font-semibold text-slate-400">Employee Account:</p>
-              <p>employee@faithautomation.com</p>
-              <p className="text-[10px]">EmployeePassword123!</p>
-            </div>
-          </div>
-        </div>
+
       </div>
 
       {/* Forgot Password Modal */}
