@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Workflow, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import logoImg from "../assets/logo.png";
 
 const Login = () => {
   const { login, forgotPassword } = useAuth();
@@ -54,11 +55,10 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 relative overflow-hidden">
       <div className="w-full max-w-md space-y-6 z-10 animate-slide-in">
         <div className="flex flex-col items-center">
-          <div className="flex items-center justify-center bg-brand-600 p-3 rounded-lg text-white mb-3">
-            <Workflow size={28} />
+          <div className="bg-white px-4 py-2 rounded-lg mb-4 flex items-center justify-center shadow-sm border border-slate-100">
+            <img src={logoImg} alt="Faith Automation" className="h-8 object-contain" />
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Faith Automation</h2>
-          <p className="mt-1 text-xs text-slate-400 font-semibold uppercase tracking-wider">
+          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
             Project & Task Manager
           </p>
         </div>
